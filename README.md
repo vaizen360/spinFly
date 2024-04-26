@@ -31,3 +31,6 @@ Once your data is processed and prepared, you can upload it to [DGRP2](http://dg
 **Running**
 
 Given that you are able to organize your collected data in the same format as specified above, running this code should only include the installation of R on your computer and uploaded your data into an open R environmenet along with this code. 
+
+**Our Results**
+The results of this study can be found and read as a [poster](https://tagc2020.figshare.com/articles/poster/Understanding_how_nuclear_genetic_variation_in_a_population_can_affect_mutant_ND2_gene_phenotypes_associated_with_complex-I_mitochondrial_diseases_using_Drosophila_melanogaster/12149838/1) presented at The Allied Genetics Conference of America of the Genetics Society of America 2020 if you are interested. 
