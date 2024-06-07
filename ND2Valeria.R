@@ -10,24 +10,32 @@ setwd("/Users/valeriaaizen/Documents/College- Research")
 dir()
 read.csv("ND2raw.csv", header = T) ->ND2
 head(ND2)
+
+#Selecting only those columns in dataset that are important for analysis and defining as x
 (ND2[,7:18]) -> x
+
+#Installing tidyr library
 install.packages("tidyr")
 library("tidyr")
+
+#Taking selected columns 7:18 and collapsing them into key value pairs using the gather function in tidyr
 gather(x) -> y
 head(y)
-sum(unique(ND2$line))
+sum(unique(ND2$line)) #Number of unique Drosophila lines present in the dataset
 
 #Tried to see what normalizing the data using just a log would be like using x and y.H3 is created below 
 
 hist(y$value, col = "red", breaks = 20, xlab = "Recovery Time (s)", main = "Histogram")
 hist(log(y$value), col = "red", breaks = 20, xlab = "Recovery Time (log s)", main = "Histogram")
 
-#Gathered all flies into one line and replicated original.order, block, tag, N, line, and vial
+#Gathered all flies in the same line into one and replicated original.order, block, tag, N, line, and vial using the reshape function. 
+#Defined as h
 
 reshape(ND2, direction = "long", varying = list(names(ND2)[7:18]), v.names = "Recovery Time", 
         idvar = c("original.order","block","tag","line","vial","N"), timevar = "Fly Number", times = 1:12) -> h
 class(h)
 h$'Recovery Time' 
+#Transforming reshaped recovery times in h using a logarithmic transformation and visualizing in a histogram
 h$log.rec.time <- log(h$'Recovery Time')
 head(h)
 
@@ -36,16 +44,19 @@ hist(h$`Recovery Time`)  #extracted all values from the 'reshaped' h array with 
 table(is.na(h$`Recovery Time`))
 h[!is.na(h$`Recovery Time`), ] -> h2 #removed all na values from the dataset in the hopes that boxcox would work better.
 #in reality the na values aren't really that important so this dataset is useful for further analysis.
+#From here, we will be working with the dataset h2.
 
-#First Normalization suggestion we tried that didn't work (during August 2018)
-#Think I'm going to use the aggregate function for each group to find N
+
+#Use the aggregate function for each group to find N
 #Full equation: k = log(N)/log(M) (which is what we are searching/adjusting for) 
 #and x'=x^((1/log(N)-log(M))) which is the transformed data function
 
 head(h2)
+#Decided to group h2 by block by taking the average and creating a new dataset called allAverages
 aggregate(h2, by=list(h2$block),FUN = mean) -> allAverages
 head(allAverages)
 
+#Exporting new dataset to a csv file with all average N values.
 getwd()
 write.csv(allAverages, file='Average N values.csv')
 
@@ -56,23 +67,23 @@ allAverages$logN <- log(allAverages$`Recovery Time`)
 head(allAverages)
 
 #k = log(N)/log(M)
-#Again can add another separate column for all values of k. Choose M to be 4.
+#Again can add another separate column for all values of k. Choose M to be equal to 1.5 
 
-log(1.5) #1.386294 = M
+log(1.5) 
 
 allAverages$K <- allAverages$logN/log(1.5)
 
 head(allAverages)
 
 #Final calculation. Keep in mind that k for each line will differ, but not M. We are just trying to 
-#find the optimal M for all lines and batches.
+#find the optimal M for all lines and batches. 
 #Since we already have varying values of k within a column, we don't have to worry about that now. 
 
 allAverages$inverseK <- 1/allAverages$K #Makes it easier for actually doing the calculation
-allAverages[ ,c(3, 13)] -> kays 
-head(kays)
+allAverages[ ,c(3, 13)] -> kays #isolated all k values
+head(kays) #visualizing k values
 head(h2)
-merge(h2, kays, by='block') -> h3
+merge(h2, kays, by='block') -> h3 #merging and isolating original columns from h2 dataframe with k values to create new dataframe h3
 head(h3)
 
 #Gathered all flies into one line and replicated original.order, block, tag, N, line, and vial
